@@ -28,6 +28,7 @@ export function mergeSafe(
 ): Record<string, unknown> {
   for (const key of Object.keys(source)) {
     if (FORBIDDEN.has(key)) continue; // gefährliche Schlüssel verwerfen
+    // eslint-disable-next-line security/detect-object-injection -- abgesichert durch FORBIDDEN-Allowlist
     target[key] = source[key];
   }
   return target;
