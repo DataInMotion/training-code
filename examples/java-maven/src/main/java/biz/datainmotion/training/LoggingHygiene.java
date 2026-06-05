@@ -1,39 +1,48 @@
 package biz.datainmotion.training;
 
 import java.util.logging.Logger;
+import org.owasp.encoder.Encode;
 
 /**
  * Logging-Hygiene — Log-Injection/Log-Forging (CWE-117) und sensible Daten im
- * Klartext (OWASP A09). Eingaben gehören neutralisiert, Secrets/PII maskiert.
+ * Klartext (OWASP A09). User-Input gehört vor dem Logging neutralisiert,
+ * Secrets/PII maskiert.
  *
- * <p><b>Der korrekte „Do" liegt in der Logging-Konfiguration, nicht im App-Code:</b>
- * CR/LF zentral im Appender neutralisieren —
- * Logback {@code <encoder><pattern>%replace(%msg){'[\r\n]','_'}</pattern></encoder>}
- * bzw. der {@code CRLFLogConverter}, oder Log4j2 {@code %encode{%msg}{CRLF}}.
- * Für Maskierung sensibler Felder: <b>OWASP Security Logging</b>
- * ({@code org.owasp:security-logging-logback}) mit dem {@code CONFIDENTIAL}-Marker.
- * Die Methoden unten sind nur eine app-seitige Skizze / letzte Verteidigungslinie.
+ * <p>Drei Stufen: kein Escape → Eigenbau → OWASP-Encoder.
  */
 public class LoggingHygiene {
 
     private static final Logger LOG = Logger.getLogger(LoggingHygiene.class.getName());
 
     /**
-     * UNSICHER — roher User-Input im Log: CR/LF erlauben gefälschte Zeilen
-     * (z. B. {@code username = "admin\n[INFO] Zugriff erlaubt"}); PII landet im Klartext.
+     * UNSICHER (kein Escape) — roher User-Input im Log: CR/LF erlauben
+     * gefälschte Zeilen (z. B. {@code username = "admin\n[INFO] Zugriff erlaubt"}),
+     * PII landet im Klartext.
      */
     @Deprecated
-    public void logInsecure(String username) {
+    public void logNoEscape(String username) {
         LOG.info("Login: " + username);
     }
 
-    /** SICHER — CR/LF neutralisieren; nur das Nötige loggen, keine Secrets/PII. */
-    public void log(String username) {
+    /**
+     * BESSER, aber Eigenbau — ersetzt nur CR/LF. Erfasst keine weiteren
+     * Steuerzeichen und wird über den Code verteilt leicht inkonsistent.
+     */
+    public void logHandRolled(String username) {
         String safe = username.replaceAll("[\\r\\n]", "_");
         LOG.info(() -> "Login: " + safe);
     }
 
-    /** SICHER — sensible Werte maskieren statt im Klartext zu loggen. */
+    /**
+     * SICHER — OWASP Java Encoder: {@link Encode#forJava(String)} maskiert CR/LF
+     * und weitere Steuerzeichen als Java-Escapes → kein Log-Forging, kein Eigenbau.
+     * (Appender-seitige Alternative: OWASP Security Logging {@code CRLFLogConverter}.)
+     */
+    public void log(String username) {
+        LOG.info(() -> "Login: " + Encode.forJava(username));
+    }
+
+    /** Sensible Werte zusätzlich maskieren statt im Klartext zu loggen. */
     public static String mask(String secret) {
         if (secret == null || secret.length() < 4) {
             return "***";

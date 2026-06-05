@@ -12,10 +12,31 @@ Jede Datei zeigt **unsicher (Problem) vs. sicher (Lösung)**:
 - `AccessControl.java` — Broken Access Control / IDOR (A01, CWE-639): nur ID vs. Bindung an den Eigentümer (deny-by-default)
 - `UnsafeDeserialization.java` — Deserialisierung (A08, CWE-502): `ObjectInputStream` ungefiltert vs. `ObjectInputFilter`-Allowlist (besser: JSON/Text)
 - `CryptoUsage.java` — Kryptographie (A02/A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
-- `LoggingHygiene.java` — Logging-Hygiene (A09, CWE-117): roher Input/Klartext vs. CRLF-Neutralisierung + Maskierung (Do gehört in Appender / OWASP Security Logging)
+- `LoggingHygiene.java` — Logging-Hygiene (A09, CWE-117): drei Stufen — kein Escape → Eigenbau (`replaceAll`) → **OWASP Java Encoder** (`Encode.forJava`, neutralisiert CR/LF + Steuerzeichen); plus Maskierung
 - `ResourceSafety.java` — Ressourcen-Erschöpfung: unbegrenzte Rekursion/Sammlung (CWE-674/400) vs. iterativ + Limit
 - `LeakyCache.java` — Memory Leak (CWE-401): unbegrenzte statische Map vs. LRU-Cache mit Obergrenze
 - `ErrorHandling.java` — Fehlerbehandlung (CWE-209): Interna/Stacktrace nach außen vs. intern loggen + generische Meldung (fail closed)
+
+## Logging-Injection auch im Appender neutralisieren
+
+`Encode.forJava(..)` neutralisiert im **Code**. Besser noch zentral im **Appender** —
+beide Frameworks können CR/LF eingebaut entschärfen (keine Extra-Dependency):
+
+```xml
+<!-- Log4j2: eingebauter encode-Converter mit Option CRLF -->
+<PatternLayout pattern="%d %p %c{1.} [%t] %encode{%m}{CRLF}%n"/>
+```
+
+```xml
+<!-- Logback: eingebauter replace-Converter -->
+<encoder>
+  <pattern>%d %p %logger - %replace(%msg){'[\r\n]', '_'}%n</pattern>
+</encoder>
+```
+
+> Im Appender greift es für **jede** Log-Zeile — unabhängig davon, ob im Code ans
+> Encoden gedacht wurde. Für Maskierung sensibler Felder: OWASP Security Logging
+> (`CONFIDENTIAL`-Marker).
 
 ## Werkzeuge ausführen (OSS)
 
