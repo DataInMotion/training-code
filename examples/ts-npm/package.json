@@ -1,0 +1,21 @@
+{
+  "name": "secure-coding-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Secure-Coding-Demo (TypeScript) zur Compliance-Schulung",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "audit": "npm audit --audit-level=high",
+    "sbom": "cyclonedx-npm --output-file sbom.json"
+  },
+  "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-security": "^3.0.0",
+    "typescript": "^5.6.0"
+  }
+}

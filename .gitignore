@@ -1,0 +1,12 @@
+# Build- und Abhängigkeits-Artefakte
+target/
+node_modules/
+dist/
+*.class
+*.log
+*.tsbuildinfo
+bom.json
+sbom.json
+
+# Hinweis: .env, id_rsa & Co. in exercises/ sind ABSICHTLICH eingecheckte
+# Übungsartefakte (erfundene Trainingsdaten) — daher hier NICHT ignoriert.
