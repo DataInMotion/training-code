@@ -8,6 +8,11 @@ Jede Datei zeigt **unsicher (Problem) vs. sicher (Lösung)**:
 
 - `UserRepository.java` — SQL-Injection (A03), rohes JDBC: String-Konkatenation vs. Prepared Statement
 - `UserRepositoryJpa.java` — Abgrenzung ORM/JPA: parametrisiert meist automatisch, aber String-gebautes JPQL bleibt angreifbar (sicher = benannter Parameter)
+- `InputValidation.java` — Input-Validierung & Output-Encoding (A03): Blocklist vs. Allowlist; Eigenbau-Escaping vs. **OWASP Java Encoder** (`Encode.forHtml`)
+- `AccessControl.java` — Broken Access Control / IDOR (A01, CWE-639): nur ID vs. Bindung an den Eigentümer (deny-by-default)
+- `UnsafeDeserialization.java` — Deserialisierung (A08, CWE-502): `ObjectInputStream` ungefiltert vs. `ObjectInputFilter`-Allowlist (besser: JSON/Text)
+- `CryptoUsage.java` — Kryptographie (A02/A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
+- `LoggingHygiene.java` — Logging-Hygiene (A09, CWE-117): roher Input/Klartext vs. CRLF-Neutralisierung + Maskierung (Do gehört in Appender / OWASP Security Logging)
 - `ResourceSafety.java` — Ressourcen-Erschöpfung: unbegrenzte Rekursion/Sammlung (CWE-674/400) vs. iterativ + Limit
 - `LeakyCache.java` — Memory Leak (CWE-401): unbegrenzte statische Map vs. LRU-Cache mit Obergrenze
 - `ErrorHandling.java` — Fehlerbehandlung (CWE-209): Interna/Stacktrace nach außen vs. intern loggen + generische Meldung (fail closed)

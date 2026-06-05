@@ -17,6 +17,7 @@
         <dependency-check.version>10.0.4</dependency-check.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
         <findsecbugs.version>1.13.0</findsecbugs.version>
+        <owasp-encoder.version>1.3.1</owasp-encoder.version>
     </properties>
 
     <dependencies>
@@ -26,6 +27,12 @@
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.2.0</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- OWASP Java Encoder — kontextgerechtes Output-Encoding statt Eigenbau -->
+        <dependency>
+            <groupId>org.owasp.encoder</groupId>
+            <artifactId>encoder</artifactId>
+            <version>${owasp-encoder.version}</version>
         </dependency>
     </dependencies>
 
