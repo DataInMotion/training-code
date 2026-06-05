@@ -1,4 +1,4 @@
-# training-code — Code-Beispiele zur DIM Compliance-Schulung
+# Trainingscode — Code-Beispiele zur DIM Compliance-Schulung
 
 Begleit-Code zur Compliance-Schulung für Softwareentwicklung (BSI-/Standards-basiert).
 Open-Source-first, Java und TypeScript.
