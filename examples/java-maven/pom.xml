@@ -13,6 +13,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Versionen Stand der Erstellung — vor Nutzung aktualisieren. -->
+        <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <cyclonedx.version>2.9.1</cyclonedx.version>
         <dependency-check.version>10.0.4</dependency-check.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
@@ -38,6 +39,13 @@
 
     <build>
         <plugins>
+            <!-- Java-Version erzwingen (Default-Plugin ist zu alt für 'release') -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+            </plugin>
+
             <!-- SBOM erzeugen (CycloneDX):  mvn package  -> target/bom.json -->
             <plugin>
                 <groupId>org.cyclonedx</groupId>

@@ -8,14 +8,18 @@ Jede Datei zeigt **unsicher (Problem) vs. sicher (Lösung)**:
 
 - `UserRepository.java` — SQL-Injection (A03), rohes JDBC: String-Konkatenation vs. Prepared Statement
 - `UserRepositoryJpa.java` — Abgrenzung ORM/JPA: parametrisiert meist automatisch, aber String-gebautes JPQL bleibt angreifbar (sicher = benannter Parameter)
+- `CommandExecution.java` — Command Injection (CWE-78): `Runtime.exec` mit Shell-String vs. `ProcessBuilder` mit Argument-Liste
 - `InputValidation.java` — Input-Validierung & Output-Encoding (A03): Blocklist vs. Allowlist; Eigenbau-Escaping vs. **OWASP Java Encoder** (`Encode.forHtml`)
+- `FileDownload.java` — Path Traversal (CWE-22): roher Dateiname (`../`) vs. auflösen + normalisieren + Containment-Check
 - `AccessControl.java` — Broken Access Control / IDOR (A01, CWE-639): nur ID vs. Bindung an den Eigentümer (deny-by-default)
-- `UnsafeDeserialization.java` — Deserialisierung (A08, CWE-502): `ObjectInputStream` ungefiltert vs. `ObjectInputFilter`-Allowlist (besser: JSON/Text)
-- `CryptoUsage.java` — Kryptographie (A02/A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
+- `ErrorHandling.java` — Fehlerbehandlung (CWE-209): Interna/Stacktrace nach außen vs. intern loggen + generische Meldung (fail closed)
 - `LoggingHygiene.java` — Logging-Hygiene (A09, CWE-117): drei Stufen — kein Escape → Eigenbau (`replaceAll`) → **OWASP Java Encoder** (`Encode.forJava`, neutralisiert CR/LF + Steuerzeichen); plus Maskierung
+- `PasswordHashing.java` — Cryptographic Failures (A02/CWE-916): MD5 ungesalzen vs. gesalzener PBKDF2 (BSI TR-02102; Argon2id/bcrypt gleichwertig)
+- `CryptoUsage.java` — Kryptographie (A02/A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
+- `UnsafeDeserialization.java` — Deserialisierung (A08, CWE-502): `ObjectInputStream` ungefiltert vs. `ObjectInputFilter`-Allowlist (besser: JSON/Text)
+- `AccountService.java` — Race Condition / TOCTOU (CWE-367): getrennter Check-then-act (Double-Spend) vs. atomar via `synchronized` / `putIfAbsent`
 - `ResourceSafety.java` — Ressourcen-Erschöpfung: unbegrenzte Rekursion/Sammlung (CWE-674/400) vs. iterativ + Limit
 - `LeakyCache.java` — Memory Leak (CWE-401): unbegrenzte statische Map vs. LRU-Cache mit Obergrenze
-- `ErrorHandling.java` — Fehlerbehandlung (CWE-209): Interna/Stacktrace nach außen vs. intern loggen + generische Meldung (fail closed)
 
 ## Logging-Injection auch im Appender neutralisieren
 
