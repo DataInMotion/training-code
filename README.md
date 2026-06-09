@@ -1,6 +1,6 @@
 # Trainingscode — Code-Beispiele zur DIM Compliance-Schulung
 
-Begleit-Code zur Compliance-Schulung für Softwareentwicklung (BSI-/Standards-basiert).
+Begleit-Code zur Compliance-Schulung für Softwareentwicklung.
 Open-Source-first, Java und TypeScript.
 
 > ⚠️ **Dieses Repository enthält absichtlich unsicheren Code** zu Lehrzwecken.
@@ -14,8 +14,6 @@ Open-Source-first, Java und TypeScript.
 |---|---|
 | [`examples/`](examples/) | **Do & Don't** — lauffähige Demos, jede Datei zeigt *unsicher (Problem) vs. sicher (Lösung)*, mit Erläuterungen und OSS-Tooling (SCA/SBOM/SAST/Secret-Scanning) |
 | [`exercises/`](exercises/) | **Code-Review-Übungen** für Gruppenarbeit — Code mit eingebauten Schwachstellen zum Finden (Code, Build, Konfiguration, Repo-Struktur, CI/CD) |
-
-Musterlösungen zu den Übungen sind **nicht** Teil dieses Repos.
 
 ## Schnellstart
 
