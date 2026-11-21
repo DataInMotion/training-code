@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Ressourcen-Erschöpfung (DoS) — CWE-674 (unkontrollierte Rekursion),
- * CWE-400 (unkontrollierter Ressourcenverbrauch).
+ * CWE-770 (Ressourcen ohne Obergrenze).
  *
  * <p>Jeweils: unsicher (skizziert das Problem) vs. sicher (mit Obergrenze).
  */

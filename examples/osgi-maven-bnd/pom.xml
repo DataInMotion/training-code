@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Schulungsbeispiel: SBOM, Trivy-Scan und Update-Empfehlungen für eine OSGi-Anwendung,
+  gebaut mit Maven und den bnd-Maven-Plugins.
+
+    mvn package      Bundles bauen, SBOM der Anwendung: app/target/app.bndrun.cdx.json
+
+  Alles Weitere steht in der README.md. Vorlage: examples/maven-sbom aus
+  https://github.com/geckoprojects-org/org.gecko.bnd.sbom (EPL-2.0).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>biz.datainmotion.training.osgi</groupId>
+	<artifactId>booking-parent</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>Terminbuchung (OSGi-Schulungsbeispiel)</name>
+
+	<modules>
+		<module>booking-api</module>
+		<module>booking-impl</module>
+		<module>app</module>
+	</modules>
+
+	<properties>
+		<maven.compiler.release>21</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- fester Zeitstempel: gleiche Quellen ergeben gleiche Bundles und damit gleiche Hashes in der SBOM -->
+		<project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
+
+		<bnd.version>7.4.0</bnd.version>
+		<!-- SBOM-Exporter und bnd update: bis zum ersten Release nur als Snapshot verfügbar -->
+		<gecko.bnd.version>0.1.0-SNAPSHOT</gecko.bnd.version>
+	</properties>
+
+	<!-- Nur für die Snapshot-Versionen von org.gecko.bnd.sbom und bnd-update-maven-plugin.
+	     Mit dem ersten Release entfallen beide Einträge. -->
+	<repositories>
+		<repository>
+			<id>central-snapshots</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>central-snapshots</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- nur zur Übersetzungszeit: Annotationen -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>8.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.component.annotations</artifactId>
+				<version>1.5.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- Laufzeit: Framework, Declarative Services und was diese brauchen -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.framework</artifactId>
+				<version>7.0.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>2.2.12</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.component</artifactId>
+				<version>1.5.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.promise</artifactId>
+				<version>1.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.function</artifactId>
+				<version>1.2.0</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.14.0</version>
+				</plugin>
+				<!-- baut die Bundles: Manifest, DS-Komponentenbeschreibung, Paketexporte -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<extensions>true</extensions>
+					<configuration>
+						<!-- Hersteller, Kontakt und Lizenz gehören in jedes Bundle-Manifest:
+						     daraus entstehen in der SBOM die Pflichtfelder nach BSI TR-03183-2. -->
+						<bnd><![CDATA[
+Bundle-Vendor: Beispiel GmbH
+Bundle-ContactAddress: security@example.org
+Bundle-DocURL: https://example.org
+Bundle-License: EPL-2.0;link="https://www.eclipse.org/legal/epl-2.0/"
+-reproducible: true
+]]></bnd>
+					</configuration>
+					<executions>
+						<execution>
+							<id>jar</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<!-- Bericht über neuere Versionen der Abhängigkeiten (siehe README) -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.25.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

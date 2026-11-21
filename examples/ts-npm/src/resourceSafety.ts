@@ -1,4 +1,4 @@
-// Ressourcen-Erschöpfung (DoS) — CWE-674 (Rekursion), CWE-400 (Ressourcen).
+// Ressourcen-Erschöpfung (DoS) — CWE-674 (Rekursion), CWE-770 (Ressourcen ohne Obergrenze).
 // Jeweils: unsicher (skizziert das Problem) vs. sicher (mit Obergrenze).
 
 const MAX_DEPTH = 1000;

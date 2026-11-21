@@ -1,0 +1,7 @@
+# Beispiel einer security.txt nach RFC 9116 (Schulungsbeispiel, erfundene Angaben)
+Contact: mailto:security@example.com
+Expires: 2027-12-31T23:59:59Z
+Preferred-Languages: de, en
+Policy: https://example.com/security-policy
+# Our security advisories
+CSAF: https://example.com/.well-known/csaf/provider-metadata.json

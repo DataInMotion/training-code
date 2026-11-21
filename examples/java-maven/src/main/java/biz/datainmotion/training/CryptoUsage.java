@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 
 /**
- * Kryptographie — OWASP A02/A04. Schwache Verfahren & hartkodierte Schlüssel
+ * Kryptographie — OWASP A04 (Cryptographic Failures). Schwache Verfahren & hartkodierte Schlüssel
  * vs. Stand der Technik (BSI TR-02102: AES-256, authentifizierte Verschlüsselung).
  */
 public class CryptoUsage {

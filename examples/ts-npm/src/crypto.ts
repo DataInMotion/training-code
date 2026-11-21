@@ -1,4 +1,4 @@
-// Kryptographie — OWASP A02/A04 (BSI TR-02102).
+// Kryptographie — OWASP A04 (BSI TR-02102).
 // Schwaches Passwort-Hashing vs. Stand der Technik.
 
 import { createHash, scryptSync, randomBytes, timingSafeEqual } from "node:crypto";

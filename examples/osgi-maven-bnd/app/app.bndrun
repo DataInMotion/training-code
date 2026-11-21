@@ -1,0 +1,33 @@
+# Die Anwendung "Terminbuchung": Framework, Java-Version und Bundles.
+
+-runfw: org.apache.felix.framework;version='[7.0.5,7.0.5]'
+-runee: JavaSE-21
+
+# Was die Anwendung braucht ...
+-runrequires: \
+	bnd.identity;id='biz.datainmotion.training.osgi.booking.impl'
+
+# ... und was daraus aufgelöst wurde (mvn package -Presolve schreibt diese Liste).
+-runbundles: \
+	biz.datainmotion.training.osgi.booking.api;version='[1.0.0,1.0.1)',\
+	biz.datainmotion.training.osgi.booking.impl;version='[1.0.0,1.0.1)',\
+	org.apache.felix.scr;version='[2.2.12,2.2.13)',\
+	org.osgi.service.component;version='[1.5.1,1.5.2)',\
+	org.osgi.util.function;version='[1.2.0,1.2.1)',\
+	org.osgi.util.promise;version='[1.3.0,1.3.1)'
+
+# SBOM-Exporter: steht als Plugin-Abhängigkeit im pom.xml, daher ohne Pfad.
+-plugin.sbom: org.gecko.bnd.sbom.SbomExporter
+
+# level=medium: Hashes (SHA-512), Lizenzen, Hersteller - die Felder nach BSI TR-03183-2.
+# validate: prüft die SBOM gegen die Pflichtfelder der TR (siehe README zur Sichtbarkeit in Maven).
+# creator: Ersteller der SBOM und der Anwendung; ein .bndrun in einem Maven-Projekt hat kein
+#          bnd-Projekt, aus dessen Bundle-Vendor/Bundle-ContactAddress er abgeleitet würde.
+-sbom: \
+	level=medium,\
+	format=cyclonedx,\
+	validate=bsi-tr-03183-2,\
+	creator=security@example.org,\
+	application.name=terminbuchung,\
+	application.group=biz.datainmotion.training.osgi,\
+	application.version=1.0.0

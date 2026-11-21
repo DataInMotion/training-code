@@ -1,4 +1,4 @@
-// ESLint Flat Config (ESLint 9) — SAST-nahe statische Analyse.
+// ESLint Flat Config — SAST-nahe statische Analyse.
 // eslint-plugin-security findet typische Schwachstellenmuster; die UNSICHEREN
 // Demo-Funktionen sollen hier bewusst als Warnung auftauchen (Lehrwert),
 // ohne den Lint-Lauf fehlschlagen zu lassen.

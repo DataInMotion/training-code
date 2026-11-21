@@ -1,0 +1,16 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/terminbuchung-2026-002",
+  "author": "Hersteller der Terminbuchung (Schulungsbeispiel)",
+  "timestamp": "2026-11-20T14:00:00Z",
+  "version": 2,
+  "statements": [
+    {
+      "vulnerability": { "name": "CVE-2026-67890" },
+      "products": [ { "@id": "pkg:maven/com.example/terminbuchung@1.4.3" } ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Die Terminbuchung ruft die betroffene Funktion der Mail-Bibliothek nicht auf."
+    }
+  ]
+}

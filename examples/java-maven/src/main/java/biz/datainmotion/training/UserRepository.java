@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Sichere vs. unsichere Datenbankzugriffe — OWASP A03: Injection.
+ * Sichere vs. unsichere Datenbankzugriffe — OWASP A05: Injection.
  *
  * <p>Kernregel: Eingaben niemals als Code interpretieren. Werte werden über
  * Parameter gebunden, nicht in den SQL-String konkateniert.

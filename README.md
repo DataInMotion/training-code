@@ -17,7 +17,7 @@ Open-Source-first, Java und TypeScript.
 
 ## Schnellstart
 
-- **Do/Don't-Demos:** Einstieg in [`examples/README.md`](examples/README.md); je Stack ein eigenes README mit Build-/Tool-Befehlen (`examples/java-maven/`, `examples/ts-npm/`).
+- **Do/Don't-Demos:** Einstieg in [`examples/README.md`](examples/README.md); je Stack ein eigenes README mit Build-/Tool-Befehlen (`examples/java-maven/`, `examples/ts-npm/`, `examples/osgi-maven-bnd/`, `examples/security-advisories/`).
 - **Übungen:** Ablauf in [`exercises/README.md`](exercises/README.md).
 
 ## Lizenz

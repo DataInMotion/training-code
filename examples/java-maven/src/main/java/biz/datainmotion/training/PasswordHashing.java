@@ -9,20 +9,22 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
- * Passwörter speichern — OWASP A02 (Cryptographic Failures), CWE-916.
+ * Passwörter speichern — OWASP A04 (Cryptographic Failures), CWE-916
+ * (zu schneller Hash) und CWE-759 (ohne Salt).
  *
  * <p>Passwörter NIE im Klartext und NIE mit schnellen Hashes (MD5/SHA-*)
- * ablegen — die lassen sich per GPU/Rainbow-Table massenhaft zurückrechnen.
+ * ablegen — die lassen sich per GPU/Rainbow-Table massenhaft durchprobieren.
  * Stattdessen ein <em>langsamer</em>, gesalzener Passwort-Hash.
  *
- * <p>BSI TR-02102-1 / OWASP empfehlen Argon2id (bevorzugt), bcrypt oder
- * PBKDF2. Argon2/bcrypt brauchen eine Library — hier PBKDF2, weil im JDK
- * enthalten und damit ohne Zusatz-Dependency lauffähig.
+ * <p>Für neue Systeme empfiehlt OWASP Argon2id (nennt auch die BSI
+ * TR-02102-1); bcrypt nur im Bestand, PBKDF2 wo FIPS-140 verlangt ist.
+ * Argon2id braucht eine Library — hier PBKDF2, weil im JDK enthalten und
+ * damit ohne Zusatz-Dependency lauffähig.
  */
 public class PasswordHashing {
 
     private static final SecureRandom RNG = new SecureRandom();
-    private static final int ITERATIONS = 210_000; // OWASP-Richtwert für PBKDF2-HMAC-SHA256
+    private static final int ITERATIONS = 600_000; // OWASP-Richtwert für PBKDF2-HMAC-SHA256
     private static final int KEY_BITS = 256;
 
     /**
@@ -37,8 +39,8 @@ public class PasswordHashing {
 
     /**
      * SICHER — pro Passwort zufälliges Salt + bewusst teurer KDF (PBKDF2).
-     * Ergebnis als {@code salt:hash} ablegen; bcrypt/Argon2id sind gleichwertig
-     * oder besser, wenn eine Library erlaubt ist.
+     * Ergebnis als {@code salt:hash} ablegen. Für neue Systeme Argon2id
+     * bevorzugen, wenn eine Library erlaubt ist.
      */
     public String hash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] salt = new byte[16];

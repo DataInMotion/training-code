@@ -1,5 +1,5 @@
 // Sicheres vs. unsicheres Coding — Input-Validierung & Output-Encoding.
-// OWASP A03 (Injection / XSS).
+// OWASP A05 (Injection / XSS).
 
 // --- Input-Validierung ---
 

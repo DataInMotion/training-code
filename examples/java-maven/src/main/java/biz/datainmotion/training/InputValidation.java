@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 import org.owasp.encoder.Encode;
 
 /**
- * Input-Validierung & Output-Encoding — OWASP A03 (Injection/XSS).
+ * Input-Validierung & Output-Encoding — OWASP A05 (Injection/XSS).
  * Allowlist statt Blocklist; bei der Ausgabe kontextgerecht kodieren.
  */
 public class InputValidation {
@@ -18,7 +18,7 @@ public class InputValidation {
      * Javas Backtracking-Engine in „catastrophic backtracking" — ein einziger
      * Request mit ~40 Zeichen blockiert einen Thread sekunden- bis minutenlang.
      * Allowlist-Validierung ist richtig, aber eine schlecht gebaute Regex führt
-     * eine neue DoS-Klasse ein (A03 trifft Verfügbarkeit).
+     * eine neue DoS-Klasse ein (A05 trifft Verfügbarkeit).
      */
     private static final Pattern EMAIL_REDOS =
             Pattern.compile("^([A-Za-z0-9._%+-]+)+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");

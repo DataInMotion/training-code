@@ -1,0 +1,6 @@
+# Build-Ausgabe (SBOM, Trivy- und bnd-update-Berichte liegen unter app/target/)
+target/
+# leere Verzeichnisse, die bnd beim Export neben app.bndrun anlegt
+app/bin/
+app/generated/
+app/src/

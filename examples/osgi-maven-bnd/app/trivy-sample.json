@@ -1,0 +1,30 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "app/target/app.bndrun.cdx.json",
+  "ArtifactType": "cyclonedx",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "SAMPLE-0001",
+          "PkgName": "org.apache.felix:org.apache.felix.scr",
+          "InstalledVersion": "2.2.12",
+          "FixedVersion": "2.2.14",
+          "Severity": "HIGH",
+          "Title": "Erfundener Befund, behoben in derselben Versionslinie (Micro-Update)"
+        },
+        {
+          "VulnerabilityID": "SAMPLE-0002",
+          "PkgName": "org.apache.felix:org.apache.felix.framework",
+          "InstalledVersion": "7.0.5",
+          "FixedVersion": "8.0.0",
+          "Severity": "MEDIUM",
+          "Title": "Erfundener Befund, behoben erst in der nächsten Major-Version"
+        }
+      ]
+    }
+  ]
+}

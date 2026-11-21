@@ -1,0 +1,60 @@
+{
+  "document": {
+    "category": "csaf_vex",
+    "csaf_version": "2.0",
+    "lang": "de",
+    "title": "Terminbuchung: nicht betroffen von CVE-2026-67890 in der Mail-Bibliothek",
+    "distribution": { "tlp": { "label": "WHITE" } },
+    "publisher": {
+      "category": "vendor",
+      "name": "Hersteller der Terminbuchung (Schulungsbeispiel)",
+      "namespace": "https://example.com"
+    },
+    "notes": [
+      {
+        "category": "summary",
+        "text": "Die Terminbuchung liefert die betroffene Mail-Bibliothek aus, ruft die verwundbare Funktion aber nicht auf."
+      }
+    ],
+    "tracking": {
+      "id": "EXAMPLE-2026-002",
+      "status": "final",
+      "version": "2",
+      "initial_release_date": "2026-11-18T09:00:00Z",
+      "current_release_date": "2026-11-20T14:00:00Z",
+      "revision_history": [
+        { "number": "1", "date": "2026-11-18T09:00:00Z", "summary": "Erste Einschätzung: wird geprüft" },
+        { "number": "2", "date": "2026-11-20T14:00:00Z", "summary": "Prüfung abgeschlossen: nicht betroffen" }
+      ]
+    }
+  },
+  "product_tree": {
+    "full_product_names": [
+      {
+        "product_id": "TB-1.4.3",
+        "name": "Terminbuchung 1.4.3",
+        "product_identification_helper": { "purl": "pkg:maven/com.example/terminbuchung@1.4.3" }
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2026-67890",
+      "notes": [
+        {
+          "category": "description",
+          "text": "Schwachstelle in einer Funktion der eingebundenen Mail-Bibliothek zum Verarbeiten eingehender Nachrichten."
+        }
+      ],
+      "product_status": {
+        "known_not_affected": [ "TB-1.4.3" ]
+      },
+      "flags": [
+        {
+          "label": "vulnerable_code_not_in_execute_path",
+          "product_ids": [ "TB-1.4.3" ]
+        }
+      ]
+    }
+  ]
+}

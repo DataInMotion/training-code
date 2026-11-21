@@ -6,19 +6,20 @@ Minimal-Projekt, das die Security-Werkzeuge aus den Modulen verdrahtet.
 
 Jede Datei zeigt **unsicher (Problem) vs. sicher (Lösung)**:
 
-- `UserRepository.java` — SQL-Injection (A03), rohes JDBC: String-Konkatenation vs. Prepared Statement
+- `UserRepository.java` — SQL-Injection (A05), rohes JDBC: String-Konkatenation vs. Prepared Statement
 - `UserRepositoryJpa.java` — Abgrenzung ORM/JPA: parametrisiert meist automatisch, aber String-gebautes JPQL bleibt angreifbar (sicher = benannter Parameter)
 - `CommandExecution.java` — Command Injection (CWE-78): `Runtime.exec` mit Shell-String vs. `ProcessBuilder` mit Argument-Liste
-- `InputValidation.java` — Input-Validierung & Output-Encoding (A03): Blocklist vs. Allowlist; Eigenbau-Escaping vs. **OWASP Java Encoder** (`Encode.forHtml`)
+- `InputValidation.java` — Input-Validierung & Output-Encoding (A05): Blocklist vs. Allowlist; Eigenbau-Escaping vs. **OWASP Java Encoder** (`Encode.forHtml`)
 - `FileDownload.java` — Path Traversal (CWE-22): roher Dateiname (`../`) vs. auflösen + normalisieren + Containment-Check
-- `AccessControl.java` — Broken Access Control / IDOR (A01, CWE-639): nur ID vs. Bindung an den Eigentümer (deny-by-default)
+- `AccessControl.java` — Broken Access Control / IDOR (A01, CWE-639): Buchung nur per ID vs. Bindung an das Amt der angemeldeten Person (deny-by-default)
 - `ErrorHandling.java` — Fehlerbehandlung (CWE-209): Interna/Stacktrace nach außen vs. intern loggen + generische Meldung (fail closed)
 - `LoggingHygiene.java` — Logging-Hygiene (A09, CWE-117): drei Stufen — kein Escape → Eigenbau (`replaceAll`) → **OWASP Java Encoder** (`Encode.forJava`, neutralisiert CR/LF + Steuerzeichen); plus Maskierung
-- `PasswordHashing.java` — Cryptographic Failures (A02/CWE-916): MD5 ungesalzen vs. gesalzener PBKDF2 (BSI TR-02102; Argon2id/bcrypt gleichwertig)
-- `CryptoUsage.java` — Kryptographie (A02/A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
+- `PasswordHashing.java` — Cryptographic Failures (A04, CWE-916/CWE-759): MD5 ungesalzen vs. gesalzener PBKDF2 mit 600 000 Iterationen (für Neues: Argon2id)
+- `CryptoUsage.java` — Kryptographie (A04): AES/ECB + hartkodierter Key vs. AES-256/GCM + zufälliger Schlüssel/Nonce (TR-02102)
 - `UnsafeDeserialization.java` — Deserialisierung (A08, CWE-502): `ObjectInputStream` ungefiltert vs. `ObjectInputFilter`-Allowlist (besser: JSON/Text)
+- `UnsafeReflection.java` — Unsafe Reflection (A05, CWE-470): Klassenname aus dem Request an `Class.forName` vs. Allowlist mit festen Typen
 - `AccountService.java` — Race Condition / TOCTOU (CWE-367): getrennter Check-then-act (Double-Spend) vs. atomar via `synchronized` / `putIfAbsent`
-- `ResourceSafety.java` — Ressourcen-Erschöpfung: unbegrenzte Rekursion/Sammlung (CWE-674/400) vs. iterativ + Limit
+- `ResourceSafety.java` — Ressourcen-Erschöpfung: unbegrenzte Rekursion/Sammlung (CWE-674/770) vs. iterativ + Limit
 - `LeakyCache.java` — Memory Leak (CWE-401): unbegrenzte statische Map vs. LRU-Cache mit Obergrenze
 
 ## Logging-Injection auch im Appender neutralisieren
@@ -60,9 +61,9 @@ gitleaks detect --source .
 
 ## Bezug zu den Modulen
 
-- **Modul 05** — sicheres Coding (Injection, Prepared Statements)
+- **Modul 05** — sicheres Coding (alle Dateien oben)
 - **Modul 06** — SCA & SBOM
 - **Modul 07** — SAST, Secret Scanning
 - **Modul 08** — dieselben Schritte als Pipeline-Gates
 
-> Versionen der Plugins in der `pom.xml` sind Stand der Erstellung — vor Nutzung aktualisieren.
+> Plugin-Versionen in der `pom.xml`: Stand November 2026. Das SpotBugs-Plugin braucht Maven ≥ 3.8.9; Dependency-Check lädt beim ersten Lauf die NVD-Daten (mit NVD-API-Key deutlich schneller).

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Die Anwendung: app.bndrun beschreibt, welche Bundles auf welchem Framework laufen.
+  Dieses Modul baut kein eigenes Bundle, es erzeugt die SBOM der Anwendung.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>biz.datainmotion.training.osgi</groupId>
+		<artifactId>booking-parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<artifactId>booking-app</artifactId>
+	<packaging>pom</packaging>
+	<name>Terminbuchung: Anwendung und SBOM</name>
+
+	<!-- Aus diesen Abhängigkeiten nimmt app.bndrun seine Bundles. -->
+	<dependencies>
+		<dependency>
+			<groupId>biz.datainmotion.training.osgi</groupId>
+			<artifactId>biz.datainmotion.training.osgi.booking.api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.datainmotion.training.osgi</groupId>
+			<artifactId>biz.datainmotion.training.osgi.booking.impl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.util.promise</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.util.function</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Die SBOM: das Export-Plugin von bnd mit dem SBOM-Exporter als Plugin-Abhängigkeit -->
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-export-maven-plugin</artifactId>
+				<version>${bnd.version}</version>
+				<configuration>
+					<bndruns>
+						<bndrun>app.bndrun</bndrun>
+					</bndruns>
+					<exporter>bnd.sbom</exporter>
+					<!-- beschreibt die eingecheckten -runbundles, löst nicht neu auf -->
+					<resolve>false</resolve>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>export</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.geckoprojects.bnd</groupId>
+						<artifactId>org.gecko.bnd.sbom</artifactId>
+						<version>${gecko.bnd.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!-- bnd update: Fix-Versionen zu den Trivy-Befunden, innerhalb der Versionspolitik.
+			     Bewusst nicht an eine Lebenszyklus-Phase gebunden: der Aufruf braucht einen
+			     Trivy-Bericht und soll die SBOM nicht neu schreiben. Aufruf (siehe README):
+			     mvn -f app/pom.xml bnd-update:vulnerabilities -Dbnd-update.trivy=target/trivy.json -->
+			<plugin>
+				<groupId>org.geckoprojects.bnd</groupId>
+				<artifactId>bnd-update-maven-plugin</artifactId>
+				<version>${gecko.bnd.version}</version>
+				<configuration>
+					<sbom>${project.build.directory}/app.bndrun.cdx.json</sbom>
+					<!-- Versionspolitik: nur Fehlerbehebungen derselben Linie (x.y.Z) gelten als Fix -->
+					<scope>micro</scope>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- Auflösen: berechnet aus -runrequires die -runbundles und schreibt sie in app.bndrun.
+		     Von Hand nach einer Versionsänderung: mvn package -Presolve, danach app.bndrun einchecken. -->
+		<profile>
+			<id>resolve</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-resolver-maven-plugin</artifactId>
+						<version>${bnd.version}</version>
+						<configuration>
+							<bndruns>
+								<bndrun>app.bndrun</bndrun>
+							</bndruns>
+							<!-- Änderungen in app.bndrun schreiben statt den Build abzubrechen -->
+							<failOnChanges>false</failOnChanges>
+							<writeOnChanges>true</writeOnChanges>
+						</configuration>
+						<executions>
+							<execution>
+								<!-- vor dem Export (Phase package), damit die SBOM die neue Auflösung beschreibt -->
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>resolve</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<!-- app.bndrun registriert den Exporter als Plugin; er muss auch hier auffindbar sein -->
+							<dependency>
+								<groupId>org.geckoprojects.bnd</groupId>
+								<artifactId>org.gecko.bnd.sbom</artifactId>
+								<version>${gecko.bnd.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

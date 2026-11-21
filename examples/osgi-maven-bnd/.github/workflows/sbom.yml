@@ -1,0 +1,170 @@
+name: SBOM und Schwachstellen-Scan
+
+# Baut die Bundles, schreibt die SBOM der OSGi-Anwendung (app/app.bndrun) und scannt sie mit Trivy.
+# bnd update nennt zu jedem Befund die Fix-Version innerhalb der Versionspolitik.
+#
+# Gate: Der Job "sbom" schlägt fehl, wenn es HIGH- oder CRITICAL-Schwachstellen gibt, für die
+# eine behobene Version existiert (--ignore-unfixed). Alles andere wird nur berichtet
+# (Job-Zusammenfassung, Artefakt).
+#
+# Der Job "attest" läuft nur bei einem Push auf den Hauptzweig und nur, wenn das Gate bestanden ist.
+#
+# Hinweis: Diese Datei wirkt erst, wenn sie unter .github/workflows/ im Wurzelverzeichnis eines
+# Repositories liegt (siehe README.md).
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  # Neue Schwachstellen werden auch für unveränderte Komponenten veröffentlicht.
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+# Standard für alle Jobs: nur lesen. Mehr Rechte erhält ausschließlich der Job, der sie braucht.
+permissions:
+  contents: read
+
+concurrency:
+  group: sbom-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SBOM: app/target/app.bndrun.cdx.json
+  TRIVY_REPORT: app/target/trivy.json
+
+jobs:
+  sbom:
+    name: SBOM und Trivy-Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      sbom-digest: ${{ steps.digest.outputs.sha256 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Java einrichten
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      # Phase package: Bundles bauen, danach exportiert bnd-export-maven-plugin die SBOM.
+      - name: Bauen und SBOM schreiben
+        run: mvn -B -ntp package
+
+      # Die Prüfung validate=bsi-tr-03183-2 des Exporters ist im Maven-Build derzeit nicht
+      # sichtbar (siehe README). Deshalb hier die wichtigsten Pflichtfelder direkt prüfen:
+      # Ersteller der SBOM sowie SHA-512 und Lizenz an jeder ausgelieferten Komponente.
+      - name: SBOM-Mindestinhalt prüfen
+        run: |
+          jq -e '.bomFormat == "CycloneDX" and (.metadata.manufacturer != null)' "$SBOM" > /dev/null \
+            || { echo "::error::SBOM ohne Ersteller (metadata.manufacturer)"; exit 1; }
+          missing="$(jq -r '.components[] | select(.type == "library")
+            | select(((.hashes // []) | length) == 0 or ((.licenses // []) | length) == 0)
+            | .name' "$SBOM")"
+          if [ -n "$missing" ]; then
+            echo "::error::Komponenten ohne Hash oder Lizenz: ${missing//$'\n'/, }"
+            exit 1
+          fi
+          {
+            echo "## SBOM"
+            echo
+            echo "CycloneDX $(jq -r .specVersion "$SBOM"), $(jq '.components | length' "$SBOM") Komponenten," \
+              "alle Bibliotheken mit SHA-512 und Lizenz."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Trivy einrichten
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.76.2
+          cache: true
+
+      # Vollständiger Bericht, alle Schweregrade: als JSON für bnd update, als Tabelle zum Lesen.
+      - name: SBOM scannen (vollständiger Bericht)
+        run: |
+          trivy sbom --quiet --format json --output "$TRIVY_REPORT" "$SBOM"
+          {
+            echo
+            echo "## Trivy-Scan der SBOM"
+            echo
+            echo "Gate: HIGH/CRITICAL mit behobener Version. Unten alle Befunde, alle Schweregrade."
+            echo
+            echo '```'
+            trivy sbom --quiet --format table "$SBOM"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # bnd update: zu jeder verwundbaren Bibliothek die kleinste Version, die alle Befunde behebt
+      # und in der Versionspolitik liegt (hier: micro), und wo die Bibliothek in der Anwendung sitzt.
+      # Danach alle neueren Versionen, unabhängig von Schwachstellen. Nur Berichte: Es wird nichts
+      # geändert, und dieser Schritt lässt den Job nicht scheitern.
+      - name: Update-Berichte (bnd update)
+        if: ${{ !cancelled() && hashFiles('app/target/trivy.json') != '' }}
+        run: |
+          mvn -B -ntp -q -f app/pom.xml bnd-update:vulnerabilities \
+            -Dbnd-update.trivy="$GITHUB_WORKSPACE/$TRIVY_REPORT"
+          mvn -B -ntp -q -N versions:display-dependency-updates versions:display-property-updates \
+            -Dversions.outputFile="$GITHUB_WORKSPACE/app/target/bnd-update/updates.txt" \
+            -Dversions.outputEncoding=UTF-8
+          {
+            echo
+            echo "## bnd update: Fixes innerhalb der Versionspolitik"
+            echo
+            # die Überschriften des Berichts eine Ebene tiefer
+            sed 's/^## /### /' app/target/bnd-update/vulnerabilities.md
+            echo
+            echo "## Neuere Versionen der Abhängigkeiten"
+            echo
+            echo '```'
+            cat app/target/bnd-update/updates.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Der SHA-256 der SBOM geht als Job-Ausgabe an den Job "attest".
+      - name: Digest der SBOM
+        id: digest
+        run: echo "sha256=$(sha256sum "$SBOM" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: SBOM und Berichte hochladen
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom
+          path: |
+            app/target/*.cdx.json
+            app/target/trivy.json
+            app/target/bnd-update/
+          if-no-files-found: warn
+
+      - name: Gate - behebbare HIGH/CRITICAL-Schwachstellen
+        run: trivy sbom --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$SBOM"
+
+  # Attestierung der SBOM (Build Provenance): eine von GitHub signierte Aussage, dass genau diese
+  # Datei (SHA-256) von diesem Workflow aus diesem Commit erzeugt wurde.
+  # Eigener Job, damit nur er die zusätzlichen Rechte erhält: Er checkt keinen Code aus und führt
+  # keinen Build aus, er erhält nur den Digest aus dem Job "sbom".
+  attest:
+    name: SBOM attestieren
+    needs: sbom
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      id-token: write      # OIDC-Token für die Signatur (Sigstore)
+      attestations: write  # Attestierung im Repository ablegen
+    steps:
+      - name: Attestierung erzeugen
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: app.bndrun.cdx.json
+          subject-digest: sha256:${{ needs.sbom.outputs.sbom-digest }}
