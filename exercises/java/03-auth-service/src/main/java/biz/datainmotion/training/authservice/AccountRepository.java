@@ -1,9 +1,10 @@
 package biz.datainmotion.training.authservice;
 
-import java.util.Map;
+import java.util.Optional;
 
-/** Stub für die Übung — liefert Kontodaten anhand der ID. */
 public interface AccountRepository {
 
-    Map<String, Object> findById(long id);
+    Optional<Account> findById(long id);
+
+    void close(long id);
 }

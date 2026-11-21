@@ -1,4 +1,4 @@
-# Release-Pipeline (Übungsartefakt — enthält bewusste Schwachstellen)
+# Release-Pipeline
 name: release
 
 on:

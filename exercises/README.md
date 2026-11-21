@@ -11,6 +11,22 @@ Praktische Arbeit: Teilnehmende analysieren den Code und finden in Gruppen die *
 
 > Die Schwachstellen in den Java- und TS-Beispielen sind **bewusst unterschiedlich** — kein 1:1-Spiegel.
 
+## Bauen
+
+Die Java-Beispiele sind eigenständige Maven-Projekte mit Tests:
+
+```bash
+cd java/01-user-api && mvn verify
+```
+
+Die Dienste werden in der Übung nicht gestartet — es geht um das Lesen.
+
+## Nicht alles ist ein Fehler
+
+In den Java-Beispielen steht sauberer Code neben den eingebauten Schwachstellen, und manches
+sieht nur verdächtig aus. Zu einem Review gehört beides: Fehler finden **und** begründen, warum
+eine auffällige Stelle in Ordnung ist.
+
 ## Ablauf (Vorschlag)
 
 1. Gruppen à 3–4 Personen, je ein Beispiel
